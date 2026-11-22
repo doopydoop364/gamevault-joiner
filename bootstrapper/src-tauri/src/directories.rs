@@ -1,5 +1,9 @@
 use serde::Serialize;
-use std::{fs, io::Write, path::{Component, Path, PathBuf}};
+use std::{
+    fs,
+    io::Write,
+    path::{Component, Path, PathBuf},
+};
 
 #[derive(Clone, Serialize)]
 pub struct Directories {
@@ -9,15 +13,25 @@ pub struct Directories {
 
 pub fn defaults(home: &Path) -> Result<Directories, String> {
     let parent = home.join("GameVault");
-    Ok(Directories { downloads: display(&parent.join("Downloads"))?, games: display(&parent.join("Games"))? })
+    Ok(Directories {
+        downloads: display(&parent.join("Downloads"))?,
+        games: display(&parent.join("Games"))?,
+    })
 }
 
 pub fn display(path: &Path) -> Result<String, String> {
-    path.to_str().map(str::to_owned).ok_or_else(|| "This location cannot be represented in GameVault. Choose a different folder.".into())
+    path.to_str().map(str::to_owned).ok_or_else(|| {
+        "This location cannot be represented in GameVault. Choose a different folder.".into()
+    })
 }
 
 fn validate(path: &Path) -> Result<(), String> {
-    if !path.is_absolute() || path.parent().is_none() || path.components().any(|item| matches!(item, Component::ParentDir)) {
+    if !path.is_absolute()
+        || path.parent().is_none()
+        || path
+            .components()
+            .any(|item| matches!(item, Component::ParentDir))
+    {
         return Err("Choose a full folder path below the root of your drive.".into());
     }
     Ok(())
@@ -44,7 +58,9 @@ fn check_distinct(downloads: &Path, games: &Path) -> Result<(), String> {
 }
 
 fn probe(path: &Path) -> std::io::Result<()> {
-    let mut file = tempfile::Builder::new().prefix(".joiner-write-check-").tempfile_in(path)?;
+    let mut file = tempfile::Builder::new()
+        .prefix(".joiner-write-check-")
+        .tempfile_in(path)?;
     file.write_all(b"GameVault Joiner write check")?;
     file.close()
 }
@@ -53,17 +69,28 @@ pub fn prepare(downloads: &Path, games: &Path) -> Result<Directories, String> {
     for path in [downloads, games] {
         validate(path)?;
     }
-    let canonical = |path: &Path| resolved_location(path)
-        .map_err(|error| format!("Could not resolve {}: {error}", path.display()));
+    let canonical = |path: &Path| {
+        resolved_location(path)
+            .map_err(|error| format!("Could not resolve {}: {error}", path.display()))
+    };
     check_distinct(&canonical(downloads)?, &canonical(games)?)?;
     for path in [downloads, games] {
-        fs::create_dir_all(path).map_err(|error| format!("Could not create {}: {error}", path.display()))?;
+        fs::create_dir_all(path)
+            .map_err(|error| format!("Could not create {}: {error}", path.display()))?;
     }
     check_distinct(&canonical(downloads)?, &canonical(games)?)?;
     for path in [downloads, games] {
-        probe(path).map_err(|error| format!("Could not verify write access to {}: {error}", path.display()))?;
+        probe(path).map_err(|error| {
+            format!(
+                "Could not verify write access to {}: {error}",
+                path.display()
+            )
+        })?;
     }
-    Ok(Directories { downloads: display(downloads)?, games: display(games)? })
+    Ok(Directories {
+        downloads: display(downloads)?,
+        games: display(games)?,
+    })
 }
 
 #[cfg(test)]
@@ -107,7 +134,10 @@ mod tests {
         fs::set_permissions(folder.path(), fs::Permissions::from_mode(0o755)).unwrap();
         // CI executes as an ordinary user. An administrator can still write here.
         if std::env::var_os("CI").is_some() {
-            assert_eq!(result.unwrap_err().kind(), std::io::ErrorKind::PermissionDenied);
+            assert_eq!(
+                result.unwrap_err().kind(),
+                std::io::ErrorKind::PermissionDenied
+            );
         }
     }
 }

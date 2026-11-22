@@ -12,6 +12,7 @@ map $uri $gamevault_login_key {
     ~*^/api/auth/basic/login/?$ $binary_remote_addr;
 }
 limit_req_zone $gamevault_login_key zone=gamevault_login:10m rate=12r/m;
+log_format gamevault_status '$remote_addr $request_method $status $body_bytes_sent $request_time';
 
 server {
     listen 443 ssl;
@@ -22,6 +23,8 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     limit_req zone=gamevault_login burst=8 nodelay;
     limit_req_status 429;
+    limit_req_log_level notice;
+    access_log /var/log/nginx/gamevault-access.log gamevault_status;
 
     # Public API documentation is optional. Confirm against the installed version.
     location = /api/docs { return 404; }

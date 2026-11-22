@@ -66,6 +66,10 @@ jobs:
         run: |
           npm run build
           cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - name: Verify a live official download
+        if: runner.os == 'Linux' && github.event_name == 'workflow_dispatch'
+        working-directory: bootstrapper
+        run: cargo test --locked --manifest-path src-tauri/Cargo.toml official_release_smoke -- --ignored
       - name: Bundle desktop application
         working-directory: bootstrapper
         env:

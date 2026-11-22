@@ -57,8 +57,13 @@ pub fn select(release: Release, flavor: Flavor) -> Result<Package, String> {
         Flavor::Deb => format!("GameVault-linux-x64-{version}.deb"),
         Flavor::Dmg => format!("GameVault-macos-arm64-{version}.dmg"),
     };
-    let mut matches = release.assets.into_iter().filter(|asset| asset.name == name);
-    let asset = matches.next().ok_or("The official release has no matching installer.")?;
+    let mut matches = release
+        .assets
+        .into_iter()
+        .filter(|asset| asset.name == name);
+    let asset = matches
+        .next()
+        .ok_or("The official release has no matching installer.")?;
     if matches.next().is_some() || !(1..=LIMIT).contains(&asset.size) {
         return Err("The official installer metadata is ambiguous or has an invalid size.".into());
     }
@@ -73,12 +78,22 @@ pub fn select(release: Release, flavor: Flavor) -> Result<Package, String> {
     let digest = asset.digest.as_deref().and_then(|value| value.strip_prefix("sha256:"))
         .filter(|value| value.len() == 64 && value.bytes().all(|c| c.is_ascii_hexdigit()))
         .ok_or("GitHub did not provide a usable SHA-256 digest. Retry later or visit GameVault's official website.")?;
-    Ok(Package { version: version.to_string(), name, size: asset.size, flavor, url, digest: digest.to_ascii_lowercase() })
+    Ok(Package {
+        version: version.to_string(),
+        name,
+        size: asset.size,
+        flavor,
+        url,
+        digest: digest.to_ascii_lowercase(),
+    })
 }
 
 fn clean_https(url: &Url) -> bool {
-    url.scheme() == "https" && url.port().is_none() && url.username().is_empty()
-        && url.password().is_none() && url.fragment().is_none()
+    url.scheme() == "https"
+        && url.port().is_none()
+        && url.username().is_empty()
+        && url.password().is_none()
+        && url.fragment().is_none()
 }
 
 pub fn client() -> Result<Client, String> {
@@ -94,8 +109,13 @@ pub fn client() -> Result<Client, String> {
             let from_release = attempt.previous().first().is_some_and(|first| {
                 first.host_str() == Some("github.com") && first.path().starts_with(REPO)
             });
-            if from_release && clean_https(url) && attempt.previous().len() <= 3
-                && matches!(url.host_str(), Some("release-assets.githubusercontent.com" | "objects.githubusercontent.com"))
+            if from_release
+                && clean_https(url)
+                && attempt.previous().len() <= 3
+                && matches!(
+                    url.host_str(),
+                    Some("release-assets.githubusercontent.com" | "objects.githubusercontent.com")
+                )
             {
                 attempt.follow()
             } else {
@@ -107,20 +127,32 @@ pub fn client() -> Result<Client, String> {
 }
 
 pub async fn latest(flavor: Flavor) -> Result<Package, String> {
-    let mut response = client()?.get(LATEST).header("Accept", "application/vnd.github+json")
+    let mut response = client()?
+        .get(LATEST)
+        .header("Accept", "application/vnd.github+json")
         .timeout(Duration::from_secs(30))
-        .send().await.map_err(|_| "Could not reach GitHub Releases. Check your connection and retry.")?;
+        .send()
+        .await
+        .map_err(|_| "Could not reach GitHub Releases. Check your connection and retry.")?;
     if !response.status().is_success() {
-        return Err(format!("GitHub Releases returned HTTP {}. Retry later.", response.status().as_u16()));
+        return Err(format!(
+            "GitHub Releases returned HTTP {}. Retry later.",
+            response.status().as_u16()
+        ));
     }
     let mut bytes = Vec::new();
-    while let Some(chunk) = response.chunk().await.map_err(|_| "GitHub release metadata was interrupted.")? {
+    while let Some(chunk) = response
+        .chunk()
+        .await
+        .map_err(|_| "GitHub release metadata was interrupted.")?
+    {
         if bytes.len() + chunk.len() > 2_000_000 {
             return Err("GitHub release metadata exceeded the size limit.".into());
         }
         bytes.extend_from_slice(&chunk);
     }
-    let release = serde_json::from_slice(&bytes).map_err(|_| "GitHub returned invalid release metadata.")?;
+    let release =
+        serde_json::from_slice(&bytes).map_err(|_| "GitHub returned invalid release metadata.")?;
     select(release, flavor)
 }
 
@@ -155,7 +187,10 @@ mod tests {
     #[test]
     fn rejects_preview_untrusted_url_and_bad_digest() {
         for (field, value) in [
-            ("browser_download_url", json!("https://github.com.evil.example/payload.AppImage")),
+            (
+                "browser_download_url",
+                json!("https://github.com.evil.example/payload.AppImage"),
+            ),
             ("digest", json!("sha256:nonhex")),
             ("digest", serde_json::Value::Null),
             ("size", json!(0)),

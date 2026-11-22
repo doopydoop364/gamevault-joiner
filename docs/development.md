@@ -13,6 +13,8 @@ cargo test --locked --manifest-path src-tauri/Cargo.toml
 
 From the repository root, run `node --test website/*.test.mjs` and `python3 -m unittest discover -s tests`. Build the static website with `python3 website/build.py`. For local use, serve the output with `python3 -m http.server --bind 127.0.0.1 --directory website/dist`.
 
+Run `cargo test --locked --manifest-path bootstrapper/src-tauri/Cargo.toml official_release_smoke -- --ignored` to check live official release discovery, transfer, and integrity. This test downloads an official Debian package into a temporary directory and never launches it. The Linux CI job runs this check on manual workflow dispatches.
+
 React owns the wizard state and calls typed Tauri commands. Rust owns compatibility checks, directory creation, release selection, network integrity, and installer handoff. The release URL and checksum are derived internally. The site reads the Joiner GitHub release API at runtime and enables links only when the expected named assets are published.
 
 ## Local and upstream configuration
