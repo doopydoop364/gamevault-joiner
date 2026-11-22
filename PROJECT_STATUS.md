@@ -28,19 +28,18 @@
 | Static site build | Produced `website/dist` with the HTML, CSS and JavaScript. |
 | Compose | Existing file parsed and the proposed merged override passed `docker compose config --quiet`. |
 | Whitespace | `git diff --check` passed. |
-| Rust suite and desktop build | TypeScript and Vite build passed. Rust suites and bundles are being checked in native CI. |
-| nginx syntax and public endpoints | Both nginx templates passed isolated container syntax validation. Public DNS returned NXDOMAIN for both names. |
-| Browser QA | Unrun. |
-| Windows x64 NSIS, Linux x64 AppImage and DEB, Apple Silicon DMG | Implementation and CI configured. No native artifacts or graphical installer smoke tests have been verified. |
-| GitHub Actions and releases | Private GitHub repository created and main pushed. Native CI is running. No release published. |
+| Rust suite and desktop build | TypeScript and Vite build passed. Native CI passed 9 Rust tests each on Linux and macOS and 8 on Windows. The Linux job also passed the live official DEB download and SHA-256 smoke test. |
+| nginx syntax and public endpoints | Both nginx templates passed isolated syntax validation. A mock upstream verified API forwarding and an HTTP 429 response when the login rate limit was reached. Public DNS returned NXDOMAIN for both intended hostnames. |
+| Browser QA | Headless Chromium passed desktop platform recommendation, four manual links, troubleshooting, and responsive mobile no-release behavior. |
+| Windows x64 NSIS, Linux x64 AppImage and DEB, Apple Silicon DMG | All four native packages built and their checksums were verified. The AppImage and DEB executable each opened an X11 window in an isolated Linux session. Interactive Windows and macOS installation, and end-to-end setup against the public server, are untested. |
+| GitHub Actions and releases | The [native build matrix passed](https://github.com/doopydoop364/gamevault-joiner/actions/runs/45065219070). The same build artifacts were uploaded to the [public v0.1.0 release](https://github.com/doopydoop364/gamevault-joiner/releases/tag/v0.1.0) and all four public asset digests matched the local checksums. |
 
 ## Remaining work
 
-- Confirm native CI and approval for public repository visibility before publishing the first downloadable release. npm and Cargo lockfiles are committed.
-- Run native CI, fix any build failures, then execute the smoke tests in the development guide on Windows 10/11 x64, Linux x64, and Apple Silicon. Get signing and notarization in place where required, then tag and publish.
+- Complete interactive setup smoke tests on Windows 10/11 x64, Linux x64, and Apple Silicon after the public server is available. Arrange publisher signing and notarization if required for distribution.
 - The running GameVault backend is 17.0.1 and its installed code supports both registration flags. It has port 8080 bound on all host interfaces. External reachability and an end-to-end registration and download still require verification.
 - Review the deployment changes with the server owner before modifying the proxy, backend binding, DNS, firewall, or public service exposure.
 
 ## Deployment status
 
-No server, network or public hosting changes were made. The Joiner website is prepared locally and the release workflow is configured in Git. There are no published Joiner installers.
+The GitHub repository and v0.1.0 installers are public. The download site is staged as a static CI artifact. No GameVault server, firewall, live reverse-proxy, DNS, or dedicated web hosting changes were made.

@@ -2,6 +2,8 @@
 
 A desktop setup assistant for the [GameVault server](https://gamevault.pcenthusiast.blog), plus the source for its planned [download website](https://join.gamevault.pcenthusiast.blog).
 
+Download the [v0.1.0 installers](https://github.com/doopydoop364/gamevault-joiner/releases/tag/v0.1.0) directly from GitHub.
+
 Joiner downloads the official GameVault 2 stable-channel package directly from Phalcode, verifies its published SHA-256 digest, and opens the system installer or AppImage. GameVault 2 itself is in public beta.
 
 | Operating system | CPU | Packages |
