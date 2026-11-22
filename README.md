@@ -6,11 +6,17 @@ Download the [v0.1.0 installers](https://github.com/doopydoop364/gamevault-joine
 
 Joiner downloads the official GameVault 2 stable-channel package directly from Phalcode, verifies its published SHA-256 digest, and opens the system installer or AppImage. GameVault 2 itself is in public beta.
 
-## Screenshots
+## Interface previews
 
-Welcome screen
+**Arcade green** is the current Joiner design. The wizard uses short transitions between steps and follows your system's reduced-motion preference.
 
-![GameVault Joiner welcome screen](docs/images/joiner-welcome.png)
+![GameVault Joiner welcome screen in arcade green](docs/images/joiner-arcade.png)
+
+**Midnight blue** is an alternate design concept for comparison. It is a preview, not a theme option in the released app.
+
+![GameVault Joiner welcome screen in midnight blue](docs/images/joiner-midnight.png)
+
+## Supported platforms
 
 | Operating system | CPU | Packages |
 | --- | --- | --- |

@@ -3,6 +3,7 @@
 ## Implemented
 
 - Tauri 2 desktop assistant with React and TypeScript, native platform checks, best-effort GameVault installation and version discovery, and supported-platform gating.
+- Wizard step transitions with reduced-motion support. The README shows a browser-rendered capture of the current design and a separate color concept.
 - Official stable release asset discovery, streaming transfer progress, cancellation and retry, mandatory SHA-256 and size verification, and native installer handoff.
 - Home-directory defaults and custom folder selection, write checks, non-destructive path creation, and upgrade confirmation.
 - Guided server profile, signup and activation flow. GameVault handles credentials. Wizard completion compares the library root reported by the user, checks all five preference confirmations, and rechecks write access.
@@ -31,6 +32,7 @@
 | Rust suite and desktop build | TypeScript and Vite build passed. Native CI passed 9 Rust tests each on Linux and macOS and 8 on Windows. The Linux job also passed the live official DEB download and SHA-256 smoke test. |
 | nginx syntax and public endpoints | Both nginx templates passed isolated syntax validation. A mock upstream verified API forwarding and an HTTP 429 response when the login rate limit was reached. GameVault HTTPS, HTTP redirect, anonymous download denial and hidden API documentation were checked live. The Joiner CNAME resolves publicly and GitHub Pages certificate issuance is pending. |
 | Browser QA | Headless Chromium passed desktop platform recommendation, four manual links, troubleshooting, and responsive mobile no-release behavior. |
+| Wizard visual QA | Headless Chromium rendered both README previews from the current frontend build, advanced from Welcome to Compatibility, confirmed the step animation, and confirmed that reduced motion disables it. |
 | Windows x64 NSIS, Linux x64 AppImage and DEB, Apple Silicon DMG | All four native packages built and their checksums were verified. The AppImage and DEB executable each opened an X11 window in an isolated Linux session. Interactive Windows and macOS installation, and end-to-end setup against the public server, are untested. |
 | GitHub Actions and releases | The [native build matrix passed](https://github.com/doopydoop364/gamevault-joiner/actions/runs/45065219070). The same build artifacts were uploaded to the [public v0.1.0 release](https://github.com/doopydoop364/gamevault-joiner/releases/tag/v0.1.0) and all four public asset digests matched the local checksums. |
 

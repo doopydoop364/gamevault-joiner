@@ -281,7 +281,7 @@ function App() {
       </li>)}</ol></nav></aside>
     <main tabIndex={-1}>
       <div className="step">Step {stage + 1} of {stages.length}</div>
-      {content}
+      <section key={stage} className="stage-content" aria-label={stages[stage]}>{content}</section>
       {busy && <p role="status" className="feedback">{busy}</p>}
       {notice && <p role="status" className="feedback">{notice}</p>}
       {error && <p role="alert" className="error">{error}</p>}
