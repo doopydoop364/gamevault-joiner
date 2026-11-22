@@ -19,8 +19,16 @@ pub fn open(path: &Path, flavor: Flavor) -> Result<(), String> {
 }
 
 fn launch(command: &mut Command, name: &str) -> Result<(), String> {
-    // Keep the long-running GUI off the IPC thread and reap it after exit.
     let mut child = command.stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null()).spawn().map_err(|error| format!("Could not open {name}: {error}"))?;
+    // These handlers can start successfully and then fail before opening a window.
+    std::thread::sleep(std::time::Duration::from_millis(350));
+    if let Some(status) = child.try_wait().map_err(|error| format!("Could not check {name}: {error}"))? {
+        return if status.success() {
+            Ok(())
+        } else {
+            Err(format!("{name} exited before the handoff finished ({status}). Check the package instructions or try a supported alternative."))
+        };
+    }
     std::thread::spawn(move || { let _ = child.wait(); });
     Ok(())
 }

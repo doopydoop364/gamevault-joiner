@@ -43,6 +43,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - uses: dtolnay/rust-toolchain@stable
       - name: Install Linux bundle prerequisites
         if: runner.os == 'Linux'
@@ -68,15 +71,27 @@ jobs:
       - name: Collect packages
         env:
           TARGET_ID: ${{ matrix.id }}
-        run: python3 tests/package_release.py "$TARGET_ID"
+        run: python tests/package_release.py "$TARGET_ID"
       - uses: actions/upload-artifact@v4
         with:
           name: joiner-${{ matrix.id }}
           path: out/*
           if-no-files-found: error
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python3 -m unittest discover -s tests && python3 website/build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: joiner-website
+          path: website/dist/
+          if-no-files-found: error
   publish:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, website]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -86,7 +101,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          pattern: joiner-*
+          pattern: joiner-*-*
           merge-multiple: true
           path: out
       - name: Validate tag and create checksums
@@ -97,5 +112,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --latest --draft out/*
-          gh release edit "$GITHUB_REF_NAME" --draft=false
+          gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --draft out/*
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest

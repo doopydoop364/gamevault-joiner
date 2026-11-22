@@ -1,0 +1,13 @@
+# Install GameVault and join the server
+
+1. Visit the [Joiner website](https://join.gamevault.pcenthusiast.blog) and download the package for your computer. Windows 10 (1709 and later) and Windows 11 use x64 setup. Desktop Linux x64 has an AppImage and a Debian package. Apple Silicon Macs use the ARM64 disk image.
+2. Open Joiner. On Windows run setup and use the Start menu. On macOS open the disk image and drag Joiner to Applications. On Linux enable executable permission for the AppImage in the file manager, or use a graphical package installer for DEB.
+3. In Joiner check compatibility, select the official GameVault client package, download it, and follow the installation prompt. If you already have GameVault 2, open it and confirm it works. GameVault 2 is in public beta.
+4. In the GameVault desktop app choose **New Profile** and paste `https://gamevault.pcenthusiast.blog`. Choose **Sign In** for an existing account or **Sign Up** for a new one. Wait for administrator approval, then sign in and check that the library appears.
+5. Review existing entries under **Settings → Downloads → Download locations**. In Joiner choose the defaults or set a different parent and locations. To keep a current library, pick its root and leave the entry in GameVault. Joiner checks write access and preserves existing files.
+6. Add the chosen **library root** under GameVault’s download locations, or keep the matching entry. Paste or type the path that GameVault shows back into Joiner. Choose that root when starting a download.
+7. Enable **Auto-Extract Downloads**, **Auto-Install Games**, and **Auto-Delete Source Files** in **Settings → Downloads**. Under **Settings → Startup**, enable **Launch GameVault on Computer Startup** and **Minimize GameVault to System Tray on Startup**. Confirm each option in Joiner once you see it enabled. You can change any preference later.
+
+The default library root is `GameVault/Games` inside your home folder. GameVault creates a per-game, per-version directory tree with subfolders for downloads, extraction and installation. Joiner also creates and checks `GameVault/Downloads` as a reserved folder. GameVault 2 does not provide a separate archive-root and installation-root pair for the same game in the reviewed version. See the [upstream settings](https://gamevau.lt/docs/clients/gamevault-2/settings/) and [data layout](https://gamevau.lt/docs/clients/gamevault-2/data/).
+
+For updates, use **Settings → About** in GameVault when possible. An AppImage saved by Joiner is a separate executable for that version. Use the displayed path to open it again. The other formats use their normal graphical installation method. See the [official update instructions](https://gamevau.lt/docs/clients/gamevault-2/updating/).

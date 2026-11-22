@@ -1,0 +1,9 @@
+# Proposed override for a reverse proxy on the same host. Requires Compose 2.24.4+.
+# For a proxy on a different host, first review a private-only route and ACL.
+services:
+  gamevault:
+    ports: !override
+      - "127.0.0.1:8080:8080"
+    environment:
+      SERVER_REGISTRATION_DISABLED: "false"
+      SERVER_ACCOUNT_ACTIVATION_DISABLED: "false"

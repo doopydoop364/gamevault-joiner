@@ -92,11 +92,26 @@ async fn download_client(
     fs::create_dir_all(&base).map_err(|e| format!("Could not create the local application data folder: {e}"))?;
     let (staging, path) = installation::location(&base, &package.name, flavor)?;
     let directory = path.parent().ok_or("Invalid installer location.")?;
-    let file = download::fetch(&package, directory, &session.cancel, |progress| {
-        let _ = on_progress.send(progress);
-    }).await?;
-    installation::mark_download(file.path(), flavor)?;
-    installation::save(file, &path)?;
+    if staging.is_none() && fs::symlink_metadata(&path).is_ok() {
+        let entry = fs::symlink_metadata(&path).map_err(|_| "Could not read the existing AppImage.")?;
+        if !entry.is_file() {
+            return Err("The AppImage location is occupied. Use your current installation or choose the DEB package.".into());
+        }
+        let existing_package = package.clone();
+        let existing_path = path.clone();
+        tauri::async_runtime::spawn_blocking(move || {
+            download::verify_file(&existing_package, &existing_path)
+                .map_err(|_| "The existing AppImage does not match the official release. It was left in place. Choose another package or move the file before retrying.")?;
+            installation::mark_download(&existing_path, flavor)
+        }).await.map_err(|_| "The existing AppImage could not be checked.")??;
+        let _ = on_progress.send(download::Progress { received: package.size, total: package.size });
+    } else {
+        let file = download::fetch(&package, directory, &session.cancel, |progress| {
+            let _ = on_progress.send(progress);
+        }).await?;
+        installation::mark_download(file.path(), flavor)?;
+        installation::save(file, &path)?;
+    }
     if let Some(staging) = staging {
         // The native installer may still be reading the file after Joiner closes.
         let _ = staging.keep();
@@ -112,7 +127,10 @@ fn cancel_download(session: State<'_, Session>) {
 }
 
 #[tauri::command]
-async fn install_client(session: State<'_, Session>) -> Result<(), String> {
+async fn install_client(app: AppHandle, session: State<'_, Session>, confirmed: bool) -> Result<(), String> {
+    if !confirmed {
+        return Err("Confirm that you want to open the official installer.".into());
+    }
     if session.busy.swap(true, Ordering::SeqCst) {
         return Err("Please wait for the current operation to finish.".into());
     }
@@ -122,7 +140,10 @@ async fn install_client(session: State<'_, Session>) -> Result<(), String> {
         let verified = ready.as_ref().ok_or("Download and verify the official installer first.")?;
         (verified.package.clone(), verified.path.clone())
     };
+    let home = home(&app)?;
     tauri::async_runtime::spawn_blocking(move || {
+        let detected = platform::inspect(&app, &home);
+        platform::ensure_no_downgrade(detected.version.as_deref(), &package.version)?;
         download::verify_file(&package, &path)?;
         installation::open(&path, package.flavor)
     }).await.map_err(|_| "The installer could not be opened.")?

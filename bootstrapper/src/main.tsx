@@ -188,7 +188,7 @@ function App() {
             <label className="check"><input type="checkbox" checked={allowInstall} onChange={(event) => setAllowInstall(event.target.checked)} />
               This is a fresh install, or I checked the installed version, backed up my data, closed GameVault, and chose to upgrade the existing client.</label>
             <button className="primary" disabled={!allowInstall || !!busy} onClick={() => void run("Opening the verified installer…", async () => {
-              await invoke("install_client");
+              await invoke("install_client", { confirmed: allowInstall });
               setNotice("Handoff started. Finish installation and open GameVault, then confirm above.");
             })}>Open {flavor === "appimage" ? "GameVault" : "installer"}</button>
           </>}
@@ -204,7 +204,11 @@ function App() {
           setReviewedExisting(event.target.checked); setPrepared(false);
         }} />I checked Settings → Downloads for existing locations, or this is a fresh setup.</label>
         <label className="check"><input type="checkbox" checked={keepExisting} onChange={(event) => {
-          setKeepExisting(event.target.checked); setPrepared(false); setObserved("");
+          setKeepExisting(event.target.checked);
+          if (event.target.checked) changePaths({ ...paths, games: "" });
+          else void run("Restoring home defaults…", async () => {
+            changePaths(await invoke<Paths>("default_directories"));
+          });
         }} />Keep my currently configured locations</label>
         {keepExisting && <p>Choose the library root already listed in GameVault. Keep your other existing roots in GameVault as well.</p>}
         <div className="actions">

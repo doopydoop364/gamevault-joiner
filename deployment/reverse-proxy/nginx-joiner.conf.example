@@ -1,0 +1,24 @@
+server {
+    listen 443 ssl;
+    server_name join.gamevault.pcenthusiast.blog;
+
+    ssl_certificate     /etc/ssl/gamevault-joiner/fullchain.pem;
+    ssl_certificate_key /etc/ssl/gamevault-joiner/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    root /srv/www/gamevault-joiner/current;
+    index index.html;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
+
+    types {
+        text/html html;
+        text/css css;
+        text/javascript mjs;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
