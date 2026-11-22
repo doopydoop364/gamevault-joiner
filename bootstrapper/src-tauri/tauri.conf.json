@@ -1,6 +1,6 @@
 {
   "productName": "GameVault Joiner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "blog.pcenthusiast.gamevault.joiner",
   "build": {
     "beforeDevCommand": "npm run dev",
