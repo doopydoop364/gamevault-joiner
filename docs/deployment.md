@@ -2,7 +2,7 @@
 
 ## Read-only inspection
 
-The accessible Compose file at `/opt/gamevault/compose.yaml` declares `phalcode/gamevault-backend:latest` and `postgres:18`. It publishes host port 8080 with no host address specified and sets `SERVER_REGISTRATION_DISABLED=false`. It does not explicitly set the activation flag and has explicit game and media mounts. That is the declared configuration. The running image digest and version, active settings, external port reachability, reverse proxy, and firewall remain unverified because this session cannot query the Docker socket or resolve the public domains.
+The running backend reports **17.0.1** from its package and local health API. The installed code recognizes both registration flags and assigns ordinary signups the User role, with admin exceptions for initial setup and the configured recovery username. Registration is enabled and the activation override is unset. Docker publishes port 8080 on all IPv4 and IPv6 interfaces. No service is listening locally on 80 or 443. Both intended public names returned NXDOMAIN through a public DNS resolver. External reachability of port 8080 is unverified.
 
 ## Proposed settings and proxy
 
@@ -10,7 +10,7 @@ The [current GameVault configuration reference](https://gamevau.lt/docs/server/c
 
 The prepared Compose override is for a host-local proxy and replaces the port mapping with loopback-only access. If the existing proxy is on another host, agree on a private-only bind and ACL for the proxy before applying a change. Do not replace the entire Compose file or move data. Keep PostgreSQL private. Use the exact production image digest during a settings-only recreate to avoid an accidental upgrade from the floating `latest` tag.
 
-The example nginx virtual hosts preserve HTTPS and pass web/API traffic and WebSocket upgrades, with streaming responses. Integrate the relevant settings into the existing proxy after inspecting it. The GameVault example assumes nginx is the first trusted hop. When it sits behind a CDN, use that CDN’s verified real-IP configuration before relying on forwarded client IP for throttling. Keep backend role checks and any current rate limits. Avoid exposing operational dashboards, health details, debug middleware, or Swagger endpoints beyond administrative need. Preserve any intentional administration access and verify the exact routes against the running version.
+The example nginx virtual hosts preserve HTTPS and pass web/API traffic and WebSocket upgrades, with streaming responses. The GameVault example includes a rate limit on the installed backend’s basic login route because an application-level limiter was not identified in 17.0.1. Keep any existing stricter controls. The example assumes nginx is the first trusted hop. Behind a CDN or tunnel, configure the trusted client IP source and verify that unauthenticated traffic cannot choose its own rate-limit key. Avoid exposing operational dashboards, health details, debug middleware, or Swagger endpoints beyond administrative need. Preserve intentional administration access.
 
 ## Approval, backup and rollback
 

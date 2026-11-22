@@ -24,21 +24,21 @@
 | Check | Result |
 | --- | --- |
 | Python project tests | Three passed. They cover the website and release naming contract, incomplete releases and version tags, and the canonical server address. |
-| JavaScript behavioral assertions | Four passed in a V8 harness using the checked-in test bodies. The Node test runner was unavailable. |
+| JavaScript behavioral assertions | Four passed in the Node 22 test runner. |
 | Static site build | Produced `website/dist` with the HTML, CSS and JavaScript. |
 | Compose | Existing file parsed and the proposed merged override passed `docker compose config --quiet`. |
 | Whitespace | `git diff --check` passed. |
-| Rust suite and desktop build | Unrun. Cargo, Node and npm are unavailable, and apt download attempts failed on DNS. |
-| nginx syntax and public endpoints | Unverified. nginx is unavailable and endpoints could not be resolved here. |
+| Rust suite and desktop build | TypeScript and Vite build passed. Rust suites and bundles are being checked in native CI. |
+| nginx syntax and public endpoints | Both nginx templates passed isolated container syntax validation. Public DNS returned NXDOMAIN for both names. |
 | Browser QA | Unrun. |
 | Windows x64 NSIS, Linux x64 AppImage and DEB, Apple Silicon DMG | Implementation and CI configured. No native artifacts or graphical installer smoke tests have been verified. |
-| GitHub Actions and releases | No accessible repository at the intended slug, no remote configured, and no CI job or public release run. |
+| GitHub Actions and releases | Private GitHub repository created and main pushed. Native CI is running. No release published. |
 
 ## Remaining work
 
-- Create or grant access to the intended GitHub repository, push the local commits, and generate and commit the npm and Cargo lockfiles in a network-enabled checkout.
+- Confirm native CI and approval for public repository visibility before publishing the first downloadable release. npm and Cargo lockfiles are committed.
 - Run native CI, fix any build failures, then execute the smoke tests in the development guide on Windows 10/11 x64, Linux x64, and Apple Silicon. Get signing and notarization in place where required, then tag and publish.
-- Confirm the running server image digest, version, registration and activation behavior, proxy layout, and direct port exposure. The inspected Compose file publishes host port 8080 with no IP binding, but its actual reachability is unknown.
+- The running GameVault backend is 17.0.1 and its installed code supports both registration flags. It has port 8080 bound on all host interfaces. External reachability and an end-to-end registration and download still require verification.
 - Review the deployment changes with the server owner before modifying the proxy, backend binding, DNS, firewall, or public service exposure.
 
 ## Deployment status

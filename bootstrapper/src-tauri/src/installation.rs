@@ -14,7 +14,14 @@ pub fn open(path: &Path, flavor: Flavor) -> Result<(), String> {
         Flavor::Nsis => open_windows(path),
         Flavor::Dmg => launch(Command::new("/usr/bin/open").arg(path), "Disk Image Mounter"),
         Flavor::Deb => launch(Command::new("/usr/bin/xdg-open").arg(path), "your graphical package installer"),
-        Flavor::Appimage => launch(&mut Command::new(path), "GameVault AppImage"),
+        Flavor::Appimage => launch(
+            Command::new(path)
+                .env_remove("APPIMAGE")
+                .env_remove("APPDIR")
+                .env_remove("OWD")
+                .env_remove("LD_LIBRARY_PATH"),
+            "GameVault AppImage",
+        ),
     }
 }
 

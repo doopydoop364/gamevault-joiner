@@ -5,6 +5,14 @@ map $http_upgrade $gamevault_connection {
     ''      '';
 }
 
+# Backend 17.0.1 uses basic authentication at this route. Empty keys skip
+# this zone so bulk downloads, token refresh, and Web UI requests are unaffected.
+map $uri $gamevault_login_key {
+    default "";
+    ~*^/api/auth/basic/login/?$ $binary_remote_addr;
+}
+limit_req_zone $gamevault_login_key zone=gamevault_login:10m rate=12r/m;
+
 server {
     listen 443 ssl;
     server_name gamevault.pcenthusiast.blog;
@@ -12,6 +20,8 @@ server {
     ssl_certificate     /etc/ssl/gamevault/fullchain.pem;
     ssl_certificate_key /etc/ssl/gamevault/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
+    limit_req zone=gamevault_login burst=8 nodelay;
+    limit_req_status 429;
 
     # Public API documentation is optional. Confirm against the installed version.
     location = /api/docs { return 404; }
