@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Download GameVault Joiner and get set up with our GameVault server.">
+  <meta name="color-scheme" content="dark">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./main.mjs"></script>
+  <title>GameVault Joiner</title>
+</head>
+<body>
+  <header class="wrap">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">∷</span>GameVault Joiner</a>
+    <nav aria-label="Main navigation"><a href="#downloads">Downloads</a><a href="#setup">Setup</a><a href="#help">Help</a></nav>
+  </header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="intro">
+      <div>
+        <p class="eyebrow">GameVault 2 · Public beta</p>
+        <h1 id="intro">Join our<br>game library.</h1>
+        <p class="lead">GameVault Joiner downloads the official desktop client, prepares your folders, and walks you through connecting to our server.</p>
+        <a class="button primary" id="recommended" href="#downloads">Choose your download</a>
+        <p id="device" class="muted" role="status">Select your platform below.</p>
+      </div>
+      <div class="overview">
+        <div class="overview-heading"><span class="mark" aria-hidden="true">∷</span><strong>Your setup checklist</strong></div>
+        <ul>
+          <li><span>01</span><div><strong>Get the official client</strong><small>Verified against the published SHA-256 digest</small></div></li>
+          <li><span>02</span><div><strong>Prepare your game folders</strong><small>Default locations under GameVault in your home folder</small></div></li>
+          <li><span>03</span><div><strong>Connect and register</strong><small>Start playing once your account is approved</small></div></li>
+        </ul>
+      </div>
+    </section>
+    <section id="downloads" class="section" aria-labelledby="download-title">
+      <h2 id="download-title">Download GameVault Joiner</h2>
+      <p id="release" aria-live="polite">Checking GitHub Releases…</p>
+      <noscript><p>Automatic download links require JavaScript. <a href="https://github.com/doopydoop364/gamevault-joiner/releases">View releases on GitHub</a>.</p></noscript>
+      <div class="cards">
+        <article><h3>Windows</h3><p>Windows 10 and 11 · x64</p><div class="buttons"><a class="button unavailable" data-format="windows">NSIS setup</a></div><p>Run the setup file and open GameVault Joiner from Start.</p></article>
+        <article><h3>Linux</h3><p>Desktop Linux · x64</p><div class="buttons"><a class="button unavailable" data-format="appimage">AppImage</a><a class="button unavailable" data-format="deb">DEB</a></div><p>For AppImage, allow executable files in its file properties and open it. For DEB, open the package with your graphical package installer.</p></article>
+        <article><h3>macOS</h3><p>Apple Silicon · ARM64</p><div class="buttons"><a class="button unavailable" data-format="macos">Disk image</a></div><p>Open the disk image, drag Joiner into Applications, and open it from there.</p></article>
+      </div>
+      <p><a href="https://github.com/doopydoop364/gamevault-joiner/releases">All Joiner releases</a> · <a href="https://gamevau.lt/download/">Official GameVault downloads</a></p>
+    </section>
+    <section class="section" id="setup" aria-labelledby="setup-title">
+      <h2 id="setup-title">From download to first game</h2>
+      <ol class="instructions">
+        <li><strong>Open Joiner.</strong> Check compatibility and follow the prompt to install GameVault. If you already use GameVault 2, open your current client.</li>
+        <li><strong>Prepare your folders.</strong> Use <code>GameVault/Downloads</code> and <code>GameVault/Games</code> in your home folder, or choose your own locations. Confirm existing locations before changing anything.</li>
+        <li><strong>Connect in GameVault.</strong> Choose New Profile, enter <code>https://gamevault.pcenthusiast.blog</code>, and sign up or sign in. New accounts need administrator approval.</li>
+        <li><strong>Confirm settings.</strong> Follow Joiner’s prompts to check the two paths and enable the recommended Downloads and Startup options in GameVault.</li>
+      </ol>
+      <a class="button" href="https://gamevault.pcenthusiast.blog">Open GameVault in your browser</a>
+    </section>
+    <section class="section" id="help" aria-labelledby="help-title">
+      <h2 id="help-title">Troubleshooting</h2>
+      <details><summary>My computer is outside the supported platforms</summary><p>Published packages target Windows x64, Linux x64, and Apple Silicon macOS. You can browse the library using the server’s Web UI if available.</p></details>
+      <details><summary>The installer is blocked or will not open</summary><p>Unsigned software can trigger operating system warnings. Follow your device’s security guidance. On Linux, check executable permissions and whether your distribution supports AppImage, or try DEB on a compatible system.</p></details>
+      <details><summary>I can’t sign in</summary><p>Check the full HTTPS address in GameVault. If you just registered, wait for an administrator to activate your account. You can also check whether the server page opens in a browser.</p></details>
+      <details><summary>GameVault can’t save or install a game</summary><p>Check both locations under Settings → Downloads. They need free space and write access. Rerun Joiner’s folder check if you changed either location.</p></details>
+    </section>
+  </main>
+  <footer class="wrap"><span>GameVault Joiner</span><a href="https://gamevau.lt/">GameVault project</a></footer>
+</body>
+</html>
