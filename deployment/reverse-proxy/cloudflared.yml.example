@@ -1,0 +1,6 @@
+tunnel: <tunnel-uuid>
+credentials-file: /path/to/tunnel-credentials.json
+ingress:
+  - hostname: gamevault.pcenthusiast.blog
+    service: http://127.0.0.1:18080
+  - service: http_status:404

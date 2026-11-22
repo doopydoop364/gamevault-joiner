@@ -1,8 +1,16 @@
 # Deployment
 
-## Read-only inspection
+## Running deployment
 
-The running backend reports **17.0.1** from its package and local health API. The installed code recognizes both registration flags and assigns ordinary signups the User role, with admin exceptions for initial setup and the configured recovery username. Registration is enabled and the activation override is unset. Docker publishes port 8080 on all IPv4 and IPv6 interfaces. No service is listening locally on 80 or 443. Both intended public names returned NXDOMAIN through a public DNS resolver. External reachability of port 8080 is unverified.
+GameVault uses a dedicated Cloudflare Tunnel and nginx container. The tunnel terminates public TLS and forwards to nginx on loopback port 18080. nginx forwards to the pinned GameVault 17.0.1 backend on loopback port 8080. The download site uses GitHub Pages with a DNS-only CNAME, giving the nested hostname its own certificate.
+
+On this host, the Compose project is under `/opt/gamevault`. Its override retains the PostgreSQL, media and game mounts and persists config, save files, plugins, logs and DB state under `joiner-edge/backend-state`. The backend runs as UID/GID 1000, matching the prior application user and avoiding a recursive ownership change at startup. The credential files stay on the host with restricted permissions.
+
+The pre-cutover directory is `/root/gamevault-precutover.Fojwwx`. It contains the original Compose file, a PostgreSQL archive that passed an isolated restore, copied application state, and a rollback override referring to the local container snapshot. Keep the archive and rollback image private.
+
+## Pre-cutover inspection
+
+The running backend reports **17.0.1** from its package and local health API. The installed code recognizes both registration flags and assigns ordinary signups the User role, with admin exceptions for initial setup and the configured recovery username. Registration is enabled and the activation override is unset. Before cutover Docker published port 8080 on all IPv4 and IPv6 interfaces. No service is listening locally on 80 or 443. Both names returned NXDOMAIN before the cutover. External reachability of port 8080 is unverified.
 
 ## Proposed settings and proxy
 
@@ -23,4 +31,4 @@ The example nginx virtual hosts preserve HTTPS and pass web/API traffic and WebS
 
 ## Website
 
-Build with `python3 website/build.py` or retrieve the `joiner-website` CI artifact. Review the nginx example and serve the three generated static files behind HTTPS. Deploy each version to a separate directory and switch the hosting document root or current symlink only after approval. Keep the previous site directory for rollback. The website queries GitHub for Joiner downloads and needs no GameVault server credentials. It can be staged privately before setting DNS or enabling public access.
+The Pages workflow builds `website/dist` and deploys static assets. Set the repository Pages custom domain and add a DNS-only CNAME for `join.gamevault.pcenthusiast.blog` pointing to `doopydoop364.github.io`. Enable HTTPS enforcement once GitHub provisions the custom certificate. For a self-hosted alternative, build with `python3 website/build.py` or retrieve the `joiner-website` CI artifact, then serve the three files using the nginx example. Deploy each version to a separate directory and switch the hosting document root or current symlink only after approval. Keep the previous site directory for rollback. The website queries GitHub for Joiner downloads and needs no GameVault server credentials. It can be staged privately before setting DNS or enabling public access.
