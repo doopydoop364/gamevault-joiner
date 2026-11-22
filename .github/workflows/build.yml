@@ -51,18 +51,17 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libayatana-appindicator3-dev librsvg2-dev patchelf pkg-config libfuse2
       - name: Install desktop dependencies
         working-directory: bootstrapper
-        run: |
-          if test -f package-lock.json; then npm ci; else npm install --no-audit --no-fund; fi
+        run: npm ci --no-audit --no-fund
       - name: Test onboarding and website
         run: node --test bootstrapper/src/*.test.mjs website/*.test.mjs
       - name: Test Rust backend
         working-directory: bootstrapper
         run: |
           npm run build
-          cargo test --manifest-path src-tauri/Cargo.toml
+          cargo test --locked --manifest-path src-tauri/Cargo.toml
       - name: Bundle desktop application
         working-directory: bootstrapper
         env:

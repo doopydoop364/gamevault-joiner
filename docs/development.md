@@ -4,11 +4,11 @@ Use Node.js 22, npm, stable Rust, and a native runner for your target. Follow th
 
 ```sh
 cd bootstrapper
-npm install
+npm ci
 npm run tauri -- dev
 npm test
 npm run build
-cargo test --manifest-path src-tauri/Cargo.toml
+cargo test --locked --manifest-path src-tauri/Cargo.toml
 ```
 
 From the repository root, run `node --test website/*.test.mjs` and `python3 -m unittest discover -s tests`. Build the static website with `python3 website/build.py`. For local use, serve the output with `python3 -m http.server --bind 127.0.0.1 --directory website/dist`.
@@ -27,7 +27,7 @@ Sources reviewed include the [upstream stable release assets](https://github.com
 
 ## Release procedure
 
-1. Generate and commit `bootstrapper/package-lock.json` and `bootstrapper/src-tauri/Cargo.lock` in a network-enabled checkout. Use those lockfiles for subsequent release work.
+1. Keep `bootstrapper/package-lock.json` and `bootstrapper/src-tauri/Cargo.lock` committed. Refresh them when dependency declarations change.
 2. Match versions in `bootstrapper/package.json`, `bootstrapper/src-tauri/Cargo.toml`, and `bootstrapper/src-tauri/tauri.conf.json`. Run the native build matrix on `main`.
 3. Download the workflow artifacts and complete the smoke tests below. Arrange Joiner signing and notarization for production distribution where required by OS policy.
 4. Push a matching stable tag like `v0.1.0` to publish. CI verifies all four packages and stages a draft with SHA-256 checksums before publishing it. A failed publish may leave a draft. Inspect its assets before completing the release or clearing it for a retry.
