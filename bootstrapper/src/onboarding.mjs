@@ -22,9 +22,9 @@ export function canAdvance(stage, state) {
     case 0: return true;
     case 1: return state.supported;
     case 2: return state.clientOpen;
-    case 3: return state.prepared;
-    case 4: return state.profileReady;
-    case 5: return state.pathsMatch && state.enabledCount === settings.length;
+    case 3: return state.profileReady;
+    case 4: return state.prepared;
+    case 5: return state.rootMatches && state.enabledCount === settings.length;
     default: return false;
   }
 }

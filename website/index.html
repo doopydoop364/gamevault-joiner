@@ -26,9 +26,9 @@
       <div class="overview">
         <div class="overview-heading"><span class="mark" aria-hidden="true">∷</span><strong>Your setup checklist</strong></div>
         <ul>
-          <li><span>01</span><div><strong>Get the official client</strong><small>Verified against the published SHA-256 digest</small></div></li>
-          <li><span>02</span><div><strong>Prepare your game folders</strong><small>Default locations under GameVault in your home folder</small></div></li>
-          <li><span>03</span><div><strong>Connect and register</strong><small>Start playing once your account is approved</small></div></li>
+          <li><div><strong>Get the official client</strong><small>Verified against the published SHA-256 digest</small></div></li>
+          <li><div><strong>Prepare your game folders</strong><small>Default locations under GameVault in your home folder</small></div></li>
+          <li><div><strong>Connect and register</strong><small>Start playing once your account is approved</small></div></li>
         </ul>
       </div>
     </section>
@@ -47,9 +47,9 @@
       <h2 id="setup-title">From download to first game</h2>
       <ol class="instructions">
         <li><strong>Open Joiner.</strong> Check compatibility and follow the prompt to install GameVault. If you already use GameVault 2, open your current client.</li>
-        <li><strong>Prepare your folders.</strong> Use <code>GameVault/Downloads</code> and <code>GameVault/Games</code> in your home folder, or choose your own locations. Confirm existing locations before changing anything.</li>
+        <li><strong>Prepare your folders.</strong> Use <code>GameVault/Downloads</code> and <code>GameVault/Games</code> in your home folder, or choose your own locations. GameVault 2 uses one library root for both downloading and installing each game. Use Games as the library root and keep any existing roots you use.</li>
         <li><strong>Connect in GameVault.</strong> Choose New Profile, enter <code>https://gamevault.pcenthusiast.blog</code>, and sign up or sign in. New accounts need administrator approval.</li>
-        <li><strong>Confirm settings.</strong> Follow Joiner’s prompts to check the two paths and enable the recommended Downloads and Startup options in GameVault.</li>
+        <li><strong>Confirm settings.</strong> Follow Joiner’s prompts to check the library root and enable the recommended Downloads and Startup options in GameVault.</li>
       </ol>
       <a class="button" href="https://gamevault.pcenthusiast.blog">Open GameVault in your browser</a>
     </section>
@@ -58,7 +58,7 @@
       <details><summary>My computer is outside the supported platforms</summary><p>Published packages target Windows x64, Linux x64, and Apple Silicon macOS. You can browse the library using the server’s Web UI if available.</p></details>
       <details><summary>The installer is blocked or will not open</summary><p>Unsigned software can trigger operating system warnings. Follow your device’s security guidance. On Linux, check executable permissions and whether your distribution supports AppImage, or try DEB on a compatible system.</p></details>
       <details><summary>I can’t sign in</summary><p>Check the full HTTPS address in GameVault. If you just registered, wait for an administrator to activate your account. You can also check whether the server page opens in a browser.</p></details>
-      <details><summary>GameVault can’t save or install a game</summary><p>Check both locations under Settings → Downloads. They need free space and write access. Rerun Joiner’s folder check if you changed either location.</p></details>
+      <details><summary>GameVault can’t save or install a game</summary><p>Check your library root under Settings → Downloads → Download locations. It needs free space and write access. Rerun Joiner’s folder check if you changed the location.</p></details>
     </section>
   </main>
   <footer class="wrap"><span>GameVault Joiner</span><a href="https://gamevau.lt/">GameVault project</a></footer>

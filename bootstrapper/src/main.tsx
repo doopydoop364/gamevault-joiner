@@ -16,7 +16,7 @@ type Package = { name: string; version: string; size: number; flavor: Flavor };
 type Paths = { downloads: string; games: string };
 type Progress = { received: number; total: number };
 
-const stages = ["Welcome", "Compatibility", "GameVault client", "Local folders", "Server & account", "Verify settings", "Ready to play"];
+const stages = ["Welcome", "Compatibility", "GameVault client", "Server & account", "Local folders", "Verify settings", "Ready to play"];
 const formats: Record<Flavor, string> = {
   nsis: "Windows setup", appimage: "AppImage", deb: "Debian package", dmg: "macOS disk image",
 };
@@ -46,7 +46,7 @@ function App() {
   const [keepExisting, setKeepExisting] = useState(false);
   const [paths, setPaths] = useState<Paths>(empty);
   const [prepared, setPrepared] = useState(false);
-  const [observed, setObserved] = useState<Paths>(empty);
+  const [observed, setObserved] = useState("");
   const [profileReady, setProfileReady] = useState(false);
   const [enabled, setEnabled] = useState<boolean[]>(settings.map(() => false));
 
@@ -73,7 +73,7 @@ function App() {
   function changePaths(value: Paths) {
     setPaths(value);
     setPrepared(false);
-    setObserved(empty);
+    setObserved("");
   }
 
   function pick(kind: keyof Paths | "parent") {
@@ -105,11 +105,9 @@ function App() {
     <div className="path"><div><span>{label}</span><code>{value}</code></div>
       <button disabled={!!busy} onClick={() => copy(value)}>Copy</button></div>
   );
-  const pathsMatch = (["downloads", "games"] as const).every((key) =>
-    matchesPath(paths[key], observed[key], platform?.os === "windows"),
-  );
+  const rootMatches = matchesPath(paths.games, observed, platform?.os === "windows");
   const supported = Boolean(platform?.formats.length);
-  const next = canAdvance(stage, { supported, clientOpen, prepared, profileReady, pathsMatch, enabledCount: enabled.filter(Boolean).length });
+  const next = canAdvance(stage, { supported, clientOpen, prepared, profileReady, rootMatches, enabledCount: enabled.filter(Boolean).length });
   const existing = Boolean(platform?.existing.length);
 
   function go(to: number) {
@@ -197,28 +195,28 @@ function App() {
         </div>
       </>;
       break;
-    case 3:
+    case 4:
       content = <>
         <h1>Choose your game folders</h1>
-        <p>Joiner creates missing folders and checks that it can write to each one. The default locations are under <strong>GameVault</strong> in your home folder.</p>
+        <p>Joiner creates missing folders and checks that it can write to each one. The default locations are under <strong>GameVault</strong> in your home folder. GameVault 2 keeps each game’s downloaded archive and installed files under the same library root. Use <strong>Games</strong> for that root. Joiner creates <strong>Downloads</strong> as a separate reserved folder.</p>
         <pre aria-label="Default GameVault folder structure">{'GameVault\n├── Downloads\n└── Games'}</pre>
         <label className="check"><input type="checkbox" checked={reviewedExisting} onChange={(event) => {
           setReviewedExisting(event.target.checked); setPrepared(false);
         }} />I checked Settings → Downloads for existing locations, or this is a fresh setup.</label>
         <label className="check"><input type="checkbox" checked={keepExisting} onChange={(event) => {
-          setKeepExisting(event.target.checked); setPrepared(false); setObserved(empty);
+          setKeepExisting(event.target.checked); setPrepared(false); setObserved("");
         }} />Keep my currently configured locations</label>
-        {keepExisting && <p>Choose both current locations exactly as GameVault shows them. This keeps your existing games in place.</p>}
+        {keepExisting && <p>Choose the library root already listed in GameVault. Keep your other existing roots in GameVault as well.</p>}
         <div className="actions">
           {!keepExisting && <button disabled={!!busy} onClick={() => pick("parent")}>Change parent folder</button>}
-          <button disabled={!!busy} onClick={() => pick("downloads")}>Choose downloads</button>
-          <button disabled={!!busy} onClick={() => pick("games")}>Choose games</button>
+          <button disabled={!!busy} onClick={() => pick("downloads")}>Choose reserved folder</button>
+          <button disabled={!!busy} onClick={() => pick("games")}>Choose library root</button>
           {!keepExisting && <button disabled={!!busy} onClick={() => void run("Restoring home defaults…", async () => {
             changePaths(await invoke<Paths>("default_directories"));
           })}>Restore defaults</button>}
         </div>
-        {copyField("Download directory", paths.downloads)}
-        {copyField("Game installation directory", paths.games)}
+        {copyField("Reserved downloads folder", paths.downloads)}
+        {copyField("GameVault library root", paths.games)}
         <button className="primary" disabled={!!busy || !reviewedExisting || !paths.downloads || !paths.games}
           onClick={() => void run("Checking write access…", async () => {
             setPrepared(false);
@@ -228,7 +226,7 @@ function App() {
           })}>{keepExisting ? "Check existing folders" : "Create and check folders"}</button>
       </>;
       break;
-    case 4:
+    case 3:
       content = <>
         <h1>Connect to our server</h1>
         {copyField("Server address", SERVER)}
@@ -245,19 +243,14 @@ function App() {
     case 5:
       content = <>
         <h1>Verify GameVault settings</h1>
-        <p>In GameVault, open <strong>Settings → Downloads</strong>. {keepExisting ?
-          "Keep your existing locations selected." : "Select the two folders below for downloads and game installations. Keep other entries if you still use them."}
-          {" "}Copy or type the locations shown in GameVault back here so Joiner can compare them.</p>
-        {(["downloads", "games"] as const).map((key) => {
-          const label = key === "downloads" ? "Download directory" : "Game installation directory";
-          return <div key={key}>
-            {copyField(label, paths[key])}
-            <label className="field">{label} shown in GameVault
-              <input value={observed[key]} onChange={(event) => setObserved({ ...observed, [key]: event.target.value })} />
-            </label>
-            {observed[key] && <small>{matchesPath(paths[key], observed[key], platform?.os === "windows") ? "Matches selected folder" : "Folder does not match your selection"}</small>}
-          </div>;
-        })}
+        <p>In GameVault, open <strong>Settings → Downloads → Download locations</strong>. {keepExisting ?
+          "Keep using your existing root." : "Add the library root below and select it when starting a download. Leave existing entries in place."}
+          {" "}Copy or type the root shown in GameVault back here.</p>
+        {copyField("GameVault library root", paths.games)}
+        <label className="field">Library root shown in GameVault
+          <input value={observed} onChange={(event) => setObserved(event.target.value)} />
+        </label>
+        {observed && <small>{rootMatches ? "Matches selected root" : "Folder does not match your selection"}</small>}
         <h2>After downloading</h2>
         <p>Turn on each option in GameVault and check it here once you see it enabled.</p>
         {settings.map(([label, description], index) => <div key={label}>
@@ -273,7 +266,7 @@ function App() {
       content = <>
         <h1>Your library is ready.</h1>
         <p>Open the library in GameVault, pick a title, and choose Download. GameVault handles extraction and installation according to your settings.</p>
-        <div className="callout">{copyField("Downloads", paths.downloads)}{copyField("Games", paths.games)}</div>
+        <div className="callout">{copyField("Reserved downloads folder", paths.downloads)}{copyField("GameVault library root", paths.games)}</div>
       </>;
   }
 

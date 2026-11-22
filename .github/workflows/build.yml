@@ -1,0 +1,101 @@
+name: Build and release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2022
+            id: windows-x64
+            arch: X64
+            bundles: nsis
+          - runner: ubuntu-22.04
+            id: linux-x64
+            arch: X64
+            bundles: appimage,deb
+          - runner: macos-15
+            id: macos-arm64
+            arch: ARM64
+            bundles: dmg
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check native runner architecture
+        env:
+          EXPECTED_ARCH: ${{ matrix.arch }}
+        run: test "$RUNNER_ARCH" = "$EXPECTED_ARCH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux bundle prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2
+      - name: Install desktop dependencies
+        working-directory: bootstrapper
+        run: |
+          if test -f package-lock.json; then npm ci; else npm install --no-audit --no-fund; fi
+      - name: Test onboarding and website
+        run: node --test bootstrapper/src/*.test.mjs website/*.test.mjs
+      - name: Test Rust backend
+        working-directory: bootstrapper
+        run: |
+          npm run build
+          cargo test --manifest-path src-tauri/Cargo.toml
+      - name: Bundle desktop application
+        working-directory: bootstrapper
+        env:
+          BUNDLES: ${{ matrix.bundles }}
+        run: npm run tauri -- build --bundles "$BUNDLES"
+      - name: Collect packages
+        env:
+          TARGET_ID: ${{ matrix.id }}
+        run: python3 tests/package_release.py "$TARGET_ID"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: joiner-${{ matrix.id }}
+          path: out/*
+          if-no-files-found: error
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: joiner-*
+          merge-multiple: true
+          path: out
+      - name: Validate tag and create checksums
+        run: |
+          python3 tests/package_release.py checksums
+          (cd out && sha256sum gamevault-joiner-* > SHA256SUMS.txt)
+      - name: Publish validated release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --latest --draft out/*
+          gh release edit "$GITHUB_REF_NAME" --draft=false
