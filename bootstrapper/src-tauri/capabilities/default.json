@@ -1,0 +1,12 @@
+{
+  "identifier": "main",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    { "identifier": "opener:allow-open-url", "allow": [
+      { "url": "https://gamevau.lt/" },
+      { "url": "https://gamevault.pcenthusiast.blog/" }
+    ] }
+  ]
+}

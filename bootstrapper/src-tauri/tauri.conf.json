@@ -1,0 +1,21 @@
+{
+  "productName": "GameVault Joiner",
+  "version": "0.1.0",
+  "identifier": "blog.pcenthusiast.gamevault.joiner",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [{ "label": "main", "title": "GameVault Joiner", "width": 1000, "height": 750, "minWidth": 520, "minHeight": 550 }],
+    "security": { "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'" }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "appimage", "deb", "dmg"],
+    "icon": ["icons/icon.png", "icons/icon.ico", "icons/icon.icns"],
+    "windows": { "nsis": { "installMode": "currentUser" } }
+  }
+}
