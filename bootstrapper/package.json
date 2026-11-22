@@ -14,7 +14,8 @@
     "@tauri-apps/plugin-dialog": "2.4.0",
     "@tauri-apps/plugin-opener": "2.5.0",
     "react": "19.1.1",
-    "react-dom": "19.1.1"
+    "react-dom": "19.1.1",
+    "@tauri-apps/plugin-clipboard-manager": "2.3.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.8.4",

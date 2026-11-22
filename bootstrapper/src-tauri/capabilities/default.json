@@ -1,12 +1,22 @@
 {
   "identifier": "main",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "dialog:allow-open",
-    { "identifier": "opener:allow-open-url", "allow": [
-      { "url": "https://gamevau.lt/" },
-      { "url": "https://gamevault.pcenthusiast.blog/" }
-    ] }
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://gamevau.lt/"
+        },
+        {
+          "url": "https://gamevault.pcenthusiast.blog/"
+        }
+      ]
+    },
+    "clipboard-manager:allow-write-text"
   ]
 }

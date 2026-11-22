@@ -132,6 +132,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .manage(Session::default())
         .invoke_handler(tauri::generate_handler![
             inspect, default_directories, prepare_directories, latest, download_client,
