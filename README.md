@@ -6,6 +6,12 @@ Download the [v0.1.0 installers](https://github.com/doopydoop364/gamevault-joine
 
 Joiner downloads the official GameVault 2 stable-channel package directly from Phalcode, verifies its published SHA-256 digest, and opens the system installer or AppImage. GameVault 2 itself is in public beta.
 
+## Screenshots
+
+Welcome screen
+
+![GameVault Joiner welcome screen](docs/images/joiner-welcome.png)
+
 | Operating system | CPU | Packages |
 | --- | --- | --- |
 | Windows 10 (1709+) / 11 | x64 | NSIS setup |
