@@ -34,7 +34,7 @@
 | Browser QA | Headless Chromium passed desktop platform recommendation, four manual links, troubleshooting, and responsive mobile no-release behavior. |
 | Wizard visual QA | Headless Chromium rendered both README previews from the current frontend build, advanced from Welcome to Compatibility, confirmed the step animation, and confirmed that reduced motion disables it. |
 | Windows x64 NSIS, Linux x64 AppImage and DEB, Apple Silicon DMG | All four native packages built and their checksums were verified. The AppImage and DEB executable each opened an X11 window in an isolated Linux session. Interactive Windows and macOS installation, and end-to-end setup against the public server, are untested. |
-| GitHub Actions and releases | The [native build matrix passed](https://github.com/doopydoop364/gamevault-joiner/actions/runs/45065219070). The same build artifacts were uploaded to the [public v0.1.0 release](https://github.com/doopydoop364/gamevault-joiner/releases/tag/v0.1.0) and all four public asset digests matched the local checksums. |
+| GitHub Actions and releases | The [v0.1.1 native build and publish workflow passed](https://github.com/doopydoop364/gamevault-joiner/actions/runs/45071205614). The [public v0.1.1 release](https://github.com/doopydoop364/gamevault-joiner/releases/tag/v0.1.1) contains the Windows setup, Linux AppImage and DEB, Apple Silicon DMG, and SHA-256 manifest. The transition was browser-tested; interactive installation of this specific release on all three platforms remains untested. |
 
 ## Remaining work
 
@@ -44,4 +44,4 @@
 
 ## Deployment status
 
-The GitHub repository and v0.1.0 installers are public. GameVault is live at its canonical HTTPS URL through a dedicated Cloudflare Tunnel and loopback nginx origin. Docker now binds backend port 8080 to IPv4 loopback only. The download site is deployed through GitHub Pages, with a DNS-only custom-domain CNAME and TLS provisioning pending. No host firewall rules were edited. PostgreSQL backup restoration passed in an isolated container.
+The GitHub repository and v0.1.1 installers are public. GameVault is live at its canonical HTTPS URL through a dedicated Cloudflare Tunnel and loopback nginx origin. Docker now binds backend port 8080 to IPv4 loopback only. The download site is deployed through GitHub Pages, with a DNS-only custom-domain CNAME and TLS provisioning pending. No host firewall rules were edited. PostgreSQL backup restoration passed in an isolated container.
