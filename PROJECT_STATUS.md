@@ -25,16 +25,16 @@
 | Check | Result |
 | --- | --- |
 | Python project tests | Three passed. They cover the website and release naming contract, incomplete releases and version tags, and the canonical server address. |
-| JavaScript behavioral assertions | Four passed in the Node 22 test runner. |
-| Static site build | Produced `website/dist` with the HTML, CSS and JavaScript. |
+| JavaScript behavioral assertions | Five passed in the Node 22 test runner. |
+| Static site build | Produced `website/dist` with the HTML, CSS, JavaScript and setup screenshot. |
 | Compose | Existing file parsed and the proposed merged override passed `docker compose config --quiet`. |
 | Whitespace | `git diff --check` passed. |
 | Rust suite and desktop build | TypeScript and Vite build passed. Native CI passed 9 Rust tests each on Linux and macOS and 8 on Windows. The Linux job also passed the live official DEB download and SHA-256 smoke test. |
 | nginx syntax and public endpoints | Both nginx templates passed isolated syntax validation. A mock upstream verified API forwarding and an HTTP 429 response when the login rate limit was reached. GameVault HTTPS, HTTP redirect, anonymous download denial and hidden API documentation were checked live. The Joiner site returned HTTPS 200 with a valid hostname certificate on all four GitHub IPv4 and IPv6 edge addresses checked on 22 November 2026. |
 | Browser QA | Headless Chromium passed desktop platform recommendation, four manual links, troubleshooting, and responsive mobile no-release behavior. |
 | Wizard visual QA | Headless Chromium rendered both README previews, exercised all seven stages with mocked Tauri commands, and checked theme persistence, bundled artwork, the minimum window size, and reduced motion. |
-| Windows x64 NSIS, Linux x64 AppImage and DEB, Apple Silicon DMG | All four native packages built and their checksums were verified. The AppImage and DEB executable each opened an X11 window in an isolated Linux session. Interactive Windows and macOS installation, and end-to-end setup against the public server, are untested. |
-| GitHub Actions and releases | The [v0.1.1 native build and publish workflow passed](https://github.com/doopydoop364/gamevault-joiner/actions/runs/45071205614). The [public v0.1.1 release](https://github.com/doopydoop364/gamevault-joiner/releases/tag/v0.1.1) contains the Windows setup, Linux AppImage and DEB, Apple Silicon DMG, and SHA-256 manifest. The transition was browser-tested; interactive installation of this specific release on all three platforms remains untested. |
+| Windows x64 NSIS, Linux x64 AppImage and DEB, Apple Silicon DMG | All four v0.1.2 packages built. Their GitHub asset digests matched the SHA-256 manifest, and the downloaded DEB passed a local checksum and opened an X11 window in an isolated Linux session. Interactive Windows and macOS installation and full setup against the public server remain untested. |
+| GitHub Actions and releases | The [v0.1.2 native build and publish workflow passed](https://github.com/doopydoop364/gamevault-joiner/actions/runs/45096533101). The [public v0.1.2 release](https://github.com/doopydoop364/gamevault-joiner/releases/tag/v0.1.2) contains the Windows setup, Linux AppImage and DEB, Apple Silicon DMG, and SHA-256 manifest. |
 
 ## Remaining work
 
@@ -43,4 +43,4 @@
 
 ## Deployment status
 
-The GitHub repository and v0.1.1 installers are public. GameVault is live at its canonical HTTPS URL through a dedicated Cloudflare Tunnel and loopback nginx origin. Docker now binds backend port 8080 to IPv4 loopback only. The download site is deployed through GitHub Pages with a DNS-only custom-domain CNAME, an approved certificate, and HTTPS enforcement. No host firewall rules were edited. PostgreSQL backup restoration passed in an isolated container.
+The GitHub repository and v0.1.2 installers are public. GameVault is live at its canonical HTTPS URL through a dedicated Cloudflare Tunnel and loopback nginx origin. Docker now binds backend port 8080 to IPv4 loopback only. The download site is deployed through GitHub Pages with a DNS-only custom-domain CNAME, an approved certificate, and HTTPS enforcement. No host firewall rules were edited. PostgreSQL backup restoration passed in an isolated container.
