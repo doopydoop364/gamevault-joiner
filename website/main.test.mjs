@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { detect, parseRelease } from "./main.mjs";
+import { detect, parseGallery, parseRelease } from "./main.mjs";
 
 test("recommends only explicitly supported architectures", () => {
   for (const [platform, architecture, bitness, expected] of [
@@ -22,4 +22,17 @@ test("only links uploaded assets in the expected release repository and tag", ()
   assert.deepEqual(parseRelease(meta).files, { windows: url });
   assert.equal(parseRelease({ ...meta, prerelease: true }), null);
   assert.deepEqual(parseRelease({ ...meta, assets: [meta.assets[0], meta.assets[0]] }).files, {});
+});
+
+test("gallery accepts the public proxy media path and rejects other image URLs", () => {
+  const root = "https://gamevault.pcenthusiast.blog/gallery-api/api/media/";
+  const game = { title: " Example title ", description: "Two\n lines", coverUrl: root + "42" };
+  assert.deepEqual(parseGallery({ items: [
+    game,
+    game,
+    { ...game, coverUrl: "https://other.example/gallery-api/api/media/42" },
+    { ...game, coverUrl: "https://gamevault.pcenthusiast.blog/api/games/42/download" },
+    { ...game, coverUrl: root + "43?token=sample" },
+  ] }), [{ title: "Example title", description: "Two lines", image: root + "42" }]);
+  assert.deepEqual(parseGallery({ items: "unavailable" }), []);
 });

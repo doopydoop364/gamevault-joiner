@@ -6,7 +6,13 @@ const ASSETS = {
   deb: "gamevault-joiner-linux-x64.deb",
   macos: "gamevault-joiner-macos-arm64.dmg",
 };
-const LABELS = { windows: "Windows x64", appimage: "Linux x64", macos: "Apple Silicon" };
+const LABELS = { windows: "Download for Windows", appimage: "Download AppImage", macos: "Download for macOS" };
+const GALLERY = new URL("https://gamevault.pcenthusiast.blog/gallery-api/api/games?limit=12");
+const SAMPLE_GAMES = [
+  { title: "Hollow Knight", description: "Explore a ruined underground kingdom and battle strange creatures.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/367520/3c3489495136b26b34f8a9543c7f5645b99d388c/header.jpg?t=1776125684" },
+  { title: "Celeste", description: "Climb a mysterious mountain in a precision platformer.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/504230/header.jpg?t=1714089525" },
+  { title: "Stardew Valley", description: "Restore a farm and build a life in a rural valley.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg?t=1786554168" },
+];
 
 export function detect({ platform = "", architecture = "", bitness = "", wow64 = false } = {}) {
   if (wow64 || bitness !== "64") return null;
@@ -69,10 +75,10 @@ async function loadRelease() {
     if (!url) return;
     const hero = document.getElementById("recommended");
     hero.href = url;
-    hero.textContent = `Download for ${LABELS[format]}`;
+    hero.textContent = LABELS[format];
     document.getElementById("device").textContent = "Recommended for this device. Other packages are listed below.";
   } catch {
-    status.textContent = "Release details are temporarily unavailable. Try the GitHub releases page below.";
+    status.textContent = "Automatic downloads are temporarily unavailable.";
   }
 }
 
@@ -81,66 +87,152 @@ if (typeof document !== "undefined") {
   void loadRelease();
 }
 
-function setupCoverRails() {
+export function parseGallery(data) {
+  const items = Array.isArray(data) ? data : [data?.items, data?.data, data?.games].find(Array.isArray);
+  if (!items) return [];
+  const games = [];
+  const covers = new Set();
+  for (const item of items.slice(0, 48)) {
+    if (typeof item?.title !== "string" || !item.title.trim() || typeof item.coverUrl !== "string") continue;
+    let url;
+    try { url = new URL(item.coverUrl); } catch { continue; }
+    if (url.origin !== GALLERY.origin || !/^\/gallery-api\/api\/media\/[A-Za-z0-9_-]{1,80}$/.test(url.pathname) ||
+      url.username || url.password || url.search || url.hash || covers.has(url.href)) continue;
+    const description = typeof item.description === "string" ? item.description.replace(/\s+/g, " ").trim() : "";
+    games.push({
+      title: item.title.trim().slice(0, 100),
+      description: description.length > 180 ? description.slice(0, 179).trimEnd() + "…" : description,
+      image: url.href,
+    });
+    covers.add(url.href);
+    if (games.length === 12) break;
+  }
+  return games;
+}
+
+async function setupCoverRails() {
   const container = document.getElementById("cover-rails");
   const panel = document.querySelector(".library-art");
   const detail = document.getElementById("cover-detail");
-  if (!container || !panel || !detail) return;
-  const games = [
-    { title: "Hollow Knight", description: "Explore a ruined underground kingdom and battle strange creatures.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/367520/3c3489495136b26b34f8a9543c7f5645b99d388c/header.jpg?t=1776125684" },
-    { title: "Celeste", description: "Climb a mysterious mountain in a precision platformer.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/504230/header.jpg?t=1714089525" },
-    { title: "Stardew Valley", description: "Restore a farm and build a life in a rural valley.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg?t=1786554168" },
-  ];
+  const label = document.getElementById("cover-label");
+  const title = document.getElementById("cover-title");
+  const description = document.getElementById("cover-description");
+  const mobile = window.matchMedia("(max-width: 750px)");
+  let catalog = [];
+  try {
+    const response = await fetch(GALLERY, {
+      credentials: "omit",
+      redirect: "error",
+      signal: AbortSignal.timeout(2500),
+    });
+    if (response.ok && response.headers.get("Content-Type")?.startsWith("application/json")) {
+      catalog = parseGallery(await response.json());
+    }
+  } catch {
+    // The public catalog is optional. Keep the preview available even when it is offline.
+  }
+  const games = catalog.length ? catalog : SAMPLE_GAMES;
+  label.textContent = catalog.length ? "From the GameVault library" : "Example games";
+  label.hidden = false;
+
+  const rails = [];
+  const shown = new Set();
+  let selected;
   let timer;
   const clear = () => {
     clearTimeout(timer);
-    container.querySelectorAll(".cover-rail").forEach(rail => rail.classList.remove("paused"));
-    container.querySelectorAll(".cover-card").forEach(card => card.classList.remove("selected"));
+    if (!selected) return;
+    rails.forEach(rail => rail.classList.remove("paused"));
+    selected.classList.remove("selected");
+    selected = undefined;
     detail.hidden = true;
   };
   const select = (card, game) => {
-    container.querySelectorAll(".cover-rail").forEach(rail => rail.classList.add("paused"));
+    clear();
+    selected = card;
+    rails.forEach(rail => rail.classList.add("paused"));
     card.classList.add("selected");
-    document.getElementById("cover-title").textContent = game.title;
-    document.getElementById("cover-description").textContent = game.description;
+    title.textContent = game.title;
+    description.textContent = game.description;
+    description.hidden = !game.description;
     detail.hidden = false;
+    if (mobile.matches) return;
     const bounds = panel.getBoundingClientRect();
     const rect = card.getBoundingClientRect();
     const left = rect.left - bounds.left - detail.offsetWidth - 10;
     detail.style.left = `${Math.max(8, Math.min(left, bounds.width - detail.offsetWidth - 8))}px`;
     detail.style.top = `${Math.max(8, Math.min(rect.top - bounds.top, bounds.height - detail.offsetHeight - 8))}px`;
   };
-  for (let index = 0; index < 3; index++) {
+  const railCount = 3;
+  for (let index = 0; index < railCount; index++) {
     const rail = document.createElement("div");
     rail.className = "cover-rail";
-    for (let item = 0; item < 6; item++) {
-      const game = games[(item + index) % games.length];
+    rails.push(rail);
+    let track = games.filter((_, gameIndex) => gameIndex % railCount === index);
+    // Three covers fill the desktop viewport at every point in the loop.
+    if (track.length < 3) {
+      track = [...track];
+      for (let offset = 0; track.length < 3; offset++) {
+        const game = games[(index + offset) % games.length];
+        if (games.length < 3 || !track.includes(game)) track.push(game);
+      }
+    }
+    for (const game of [...track, ...track]) {
       const card = document.createElement("button");
       card.type = "button";
       card.className = "cover-card";
-      card.setAttribute("aria-label", `${game.title}, example game`);
+      card.classList.toggle("cover-repeat", shown.has(game));
+      shown.add(game);
       const image = document.createElement("img");
       image.src = game.image;
       image.alt = "";
-      const label = document.createElement("span");
-      label.textContent = game.title;
-      card.append(image, label);
+      const caption = document.createElement("span");
+      caption.textContent = game.title;
+      card.append(image, caption);
       card.addEventListener("pointermove", event => {
-        if (event.pointerType !== "mouse") return;
+        if (mobile.matches || event.pointerType !== "mouse") return;
         clear();
         timer = setTimeout(() => { if (card.matches(":hover")) select(card, game); }, 250);
       });
-      card.addEventListener("pointerleave", clear);
-      card.addEventListener("focus", () => select(card, game));
+      card.addEventListener("pointerleave", event => {
+        if (!mobile.matches && event.pointerType === "mouse") clear();
+      });
+      card.addEventListener("focus", () => {
+        if (card.matches(":focus-visible")) select(card, game);
+      });
       card.addEventListener("blur", clear);
       card.addEventListener("click", () => select(card, game));
       rail.append(card);
     }
     container.append(rail);
   }
+  mobile.addEventListener("change", clear);
 }
 
-if (typeof document !== "undefined") setupCoverRails();
+function setupCopyAddress() {
+  const address = document.getElementById("server-address");
+  const button = document.getElementById("copy-server");
+  const status = document.getElementById("copy-status");
+  button.hidden = false;
+  button.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(address.textContent.trim());
+      status.textContent = "Server address copied.";
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(address);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      status.textContent = "Copy the selected address manually.";
+    }
+  });
+}
+
+if (typeof document !== "undefined") {
+  void setupCoverRails();
+  setupCopyAddress();
+}
 
 function setupTheme() {
   const button = document.getElementById("theme-toggle");

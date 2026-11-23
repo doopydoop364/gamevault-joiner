@@ -7,3 +7,4 @@ output = root / "dist"
 output.mkdir(exist_ok=True)
 for name in ("index.html", "style.css", "main.mjs"):
     shutil.copyfile(root / name, output / name)
+shutil.copyfile(root.parent / "docs" / "images" / "joiner-arcade.png", output / "joiner-arcade.png")
