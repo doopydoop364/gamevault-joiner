@@ -55,7 +55,8 @@ h3{font-size:1.25rem;letter-spacing:-.03em;margin:0}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .cards article{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:22px;box-shadow:0 7px 20px #14241e08}
 .platform{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.platform-icon{display:grid;place-content:center;width:38px;height:38px;border-radius:10px;background:#e8f5d7;font-size:1.15rem}
+.platform-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:10px;background:#e8f5d7;color:#315f32}
+.platform-icon svg{display:block;width:22px;height:22px;fill:currentColor}
 .cards article p:last-child{margin-bottom:0;font-size:.94rem}
 .instructions{
   counter-reset:setup;
@@ -135,7 +136,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
 :root[data-theme="dark"] .lead{color:#becdc0}
 :root[data-theme="dark"] .button{background:#253a2c;border-color:#496653;color:#f1f6ee}
 :root[data-theme="dark"] .primary{background:var(--accent);border-color:var(--accent);color:#14241e}
-:root[data-theme="dark"] .platform-icon{background:#324d30}
+:root[data-theme="dark"] .platform-icon{background:#324d30;color:#c6f79e}
 :root[data-theme="dark"] .instructions li::before{background:#324d30;color:#c6f79e}
 :root[data-theme="dark"] code{background:#293d2f;color:#c6f79e}
 :root[data-theme="dark"] .cover-detail{background:#23382a;border-color:#496653;color:#f1f6ee}
