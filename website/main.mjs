@@ -7,7 +7,8 @@ const ASSETS = {
   macos: "gamevault-joiner-macos-arm64.dmg",
 };
 const LABELS = { windows: "Download for Windows", appimage: "Download AppImage", macos: "Download for macOS" };
-const GALLERY = new URL("https://gamevault.pcenthusiast.blog/gallery-api/api/games?limit=12");
+const GALLERY = new URL("./gallery.json", import.meta.url);
+const GALLERY_ORIGIN = "https://gamevault.pcenthusiast.blog";
 const SAMPLE_GAMES = [
   { title: "Hollow Knight", description: "Explore a ruined underground kingdom and battle strange creatures.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/367520/3c3489495136b26b34f8a9543c7f5645b99d388c/header.jpg?t=1776125684" },
   { title: "Celeste", description: "Climb a mysterious mountain in a precision platformer.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/504230/header.jpg?t=1714089525" },
@@ -96,7 +97,7 @@ export function parseGallery(data) {
     if (typeof item?.title !== "string" || !item.title.trim() || typeof item.coverUrl !== "string") continue;
     let url;
     try { url = new URL(item.coverUrl); } catch { continue; }
-    if (url.origin !== GALLERY.origin || !/^\/gallery-api\/api\/media\/[A-Za-z0-9_-]{1,80}$/.test(url.pathname) ||
+    if (url.origin !== GALLERY_ORIGIN || !/^\/gallery-api\/api\/media\/[A-Za-z0-9_-]{1,80}$/.test(url.pathname) ||
       url.username || url.password || url.search || url.hash || covers.has(url.href)) continue;
     const description = typeof item.description === "string" ? item.description.replace(/\s+/g, " ").trim() : "";
     games.push({

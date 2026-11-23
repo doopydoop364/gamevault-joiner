@@ -10,12 +10,14 @@ server {
     index index.html;
     add_header X-Content-Type-Options nosniff always;
     add_header Referrer-Policy no-referrer always;
-    add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
+    add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https://api.github.com; img-src 'self' https://gamevault.pcenthusiast.blog https://shared.akamai.steamstatic.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
 
     types {
         text/html html;
         text/css css;
         text/javascript mjs;
+        application/json json;
+        image/png png;
     }
 
     location / {
