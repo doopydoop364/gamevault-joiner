@@ -141,3 +141,26 @@ function setupCoverRails() {
 }
 
 if (typeof document !== "undefined") setupCoverRails();
+
+function setupTheme() {
+  const button = document.getElementById("theme-toggle");
+  if (!button) return;
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+  let preference = null;
+  try { preference = localStorage.getItem("gamevault-theme"); } catch {}
+  const apply = (theme) => {
+    document.documentElement.dataset.theme = theme;
+    button.querySelector(".theme-label").textContent = theme === "dark" ? "Light mode" : "Dark mode";
+    button.querySelector("[aria-hidden]").textContent = theme === "dark" ? "☀" : "☾";
+    button.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} mode`);
+  };
+  apply(preference === "dark" || preference === "light" ? preference : systemTheme.matches ? "dark" : "light");
+  button.addEventListener("click", () => {
+    preference = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    try { localStorage.setItem("gamevault-theme", preference); } catch {}
+    apply(preference);
+  });
+  systemTheme.addEventListener("change", event => { if (!preference) apply(event.matches ? "dark" : "light"); });
+}
+
+if (typeof document !== "undefined") setupTheme();
