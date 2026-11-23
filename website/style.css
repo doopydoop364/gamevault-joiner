@@ -54,3 +54,21 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
 @media(max-width:750px){.hero,.cards{grid-template-columns:1fr}.hero{padding:56px 0 64px}.overview{max-width:600px}.wrap{width:calc(100% - 36px)}.section-intro{display:block}header{flex-wrap:wrap}nav{gap:15px}}
 @media(max-width:420px){nav{width:100%;justify-content:space-between}.hero{padding-top:44px}.overview{padding:21px}.instructions li{grid-template-columns:34px 1fr;gap:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+/* Ambient sample covers */
+.library-art{position:relative;align-self:stretch;min-height:530px;overflow:hidden;mask-image:linear-gradient(to bottom,transparent,#000 15%,#000 82%,transparent);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 15%,#000 82%,transparent)}
+.cover-rails{position:absolute;inset:0;display:flex;justify-content:flex-end;gap:16px;overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 35%);-webkit-mask-image:linear-gradient(to right,transparent,#000 35%)}
+.cover-rail{display:flex;flex:0 0 130px;flex-direction:column;gap:16px;animation:cover-up 36s linear infinite}
+.cover-rail:nth-child(2){animation:cover-down 42s linear infinite}
+.cover-rail:nth-child(3){animation-duration:46s}
+.cover-rail.paused{animation-play-state:paused}
+.cover-card{position:relative;flex:0 0 180px;width:130px;height:180px;padding:0;border:0;border-radius:10px;overflow:hidden;background:#233a2c;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.cover-card img{width:100%;height:100%;object-fit:cover}
+.cover-card span{position:absolute;inset:auto 0 0;padding:20px 8px 8px;color:white;background:linear-gradient(transparent,#000d);text-align:left;font-size:12px;font-weight:700}
+.cover-card.selected{transform:scale(1.05);box-shadow:0 8px 20px #0007;z-index:2;outline:2px solid #b6f36b}
+.cover-detail{position:absolute;z-index:5;max-width:220px;padding:12px 14px;background:#fffef8;border:1px solid #d8ddd2;border-radius:12px;box-shadow:0 8px 28px #0003;pointer-events:none}
+.cover-detail p{font-size:.85rem;line-height:1.35;margin:5px 0 0}
+.cover-label{position:absolute;right:0;bottom:13%;color:#53635c;font-size:.78rem}
+@keyframes cover-up{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes cover-down{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+@media(max-width:750px){.library-art{min-height:400px}.cover-rails{justify-content:center}}
+@media(prefers-reduced-motion:reduce){.cover-rail{animation:none}}

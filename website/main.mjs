@@ -80,3 +80,64 @@ if (typeof document !== "undefined") {
   for (const link of document.querySelectorAll("[data-format]")) link.setAttribute("aria-disabled", "true");
   void loadRelease();
 }
+
+function setupCoverRails() {
+  const container = document.getElementById("cover-rails");
+  const panel = document.querySelector(".library-art");
+  const detail = document.getElementById("cover-detail");
+  if (!container || !panel || !detail) return;
+  const games = [
+    { title: "Hollow Knight", description: "Explore a ruined underground kingdom and battle strange creatures.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/367520/3c3489495136b26b34f8a9543c7f5645b99d388c/header.jpg?t=1776125684" },
+    { title: "Celeste", description: "Climb a mysterious mountain in a precision platformer.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/504230/header.jpg?t=1714089525" },
+    { title: "Stardew Valley", description: "Restore a farm and build a life in a rural valley.", image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg?t=1786554168" },
+  ];
+  let timer;
+  const clear = () => {
+    clearTimeout(timer);
+    container.querySelectorAll(".cover-rail").forEach(rail => rail.classList.remove("paused"));
+    container.querySelectorAll(".cover-card").forEach(card => card.classList.remove("selected"));
+    detail.hidden = true;
+  };
+  const select = (card, game) => {
+    container.querySelectorAll(".cover-rail").forEach(rail => rail.classList.add("paused"));
+    card.classList.add("selected");
+    document.getElementById("cover-title").textContent = game.title;
+    document.getElementById("cover-description").textContent = game.description;
+    detail.hidden = false;
+    const bounds = panel.getBoundingClientRect();
+    const rect = card.getBoundingClientRect();
+    const left = rect.left - bounds.left - detail.offsetWidth - 10;
+    detail.style.left = `${Math.max(8, Math.min(left, bounds.width - detail.offsetWidth - 8))}px`;
+    detail.style.top = `${Math.max(8, Math.min(rect.top - bounds.top, bounds.height - detail.offsetHeight - 8))}px`;
+  };
+  for (let index = 0; index < 3; index++) {
+    const rail = document.createElement("div");
+    rail.className = "cover-rail";
+    for (let item = 0; item < 6; item++) {
+      const game = games[(item + index) % games.length];
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "cover-card";
+      card.setAttribute("aria-label", `${game.title}, example game`);
+      const image = document.createElement("img");
+      image.src = game.image;
+      image.alt = "";
+      const label = document.createElement("span");
+      label.textContent = game.title;
+      card.append(image, label);
+      card.addEventListener("pointermove", event => {
+        if (event.pointerType !== "mouse") return;
+        clear();
+        timer = setTimeout(() => { if (card.matches(":hover")) select(card, game); }, 250);
+      });
+      card.addEventListener("pointerleave", clear);
+      card.addEventListener("focus", () => select(card, game));
+      card.addEventListener("blur", clear);
+      card.addEventListener("click", () => select(card, game));
+      rail.append(card);
+    }
+    container.append(rail);
+  }
+}
+
+if (typeof document !== "undefined") setupCoverRails();
