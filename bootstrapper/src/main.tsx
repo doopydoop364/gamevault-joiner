@@ -5,6 +5,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { SERVER, canAdvance, matchesPath, settings } from "./onboarding.mjs";
+import { CoverBackdrop, ThemeToggle } from "./appearance";
 import "./style.css";
 
 type Flavor = "nsis" | "appimage" | "deb" | "dmg";
@@ -18,8 +19,9 @@ type Progress = { received: number; total: number };
 
 const stages = ["Welcome", "Compatibility", "GameVault client", "Server & account", "Local folders", "Verify settings", "Ready to play"];
 const formats: Record<Flavor, string> = {
-  nsis: "Windows setup", appimage: "AppImage", deb: "Debian package", dmg: "macOS disk image",
+  nsis: "Windows installer (.exe)", appimage: "AppImage", deb: "Debian package (.deb)", dmg: "macOS disk image (.dmg)",
 };
+const platformNames: Record<string, string> = { windows: "Windows", linux: "Linux", macos: "macOS" };
 const installerHelp: Record<Flavor, string> = {
   nsis: "Follow the GameVault installer, then open GameVault from Start.",
   appimage: "Joiner saves a separate version of the AppImage and opens it. You can use that file to start GameVault again.",
@@ -28,6 +30,7 @@ const installerHelp: Record<Flavor, string> = {
 };
 const empty = { downloads: "", games: "" };
 const official = "https://gamevau.lt/";
+const officialReleases = "https://github.com/Phalcode/gamevault-frontend/releases";
 const mib = (bytes: number) => (bytes / 1048576).toFixed(1);
 
 function App() {
@@ -101,9 +104,9 @@ function App() {
     void run("Opening your browser…", () => openUrl(url));
   }
 
-  const copyField = (label: string, value: string) => (
+  const copyField = (label: string, value: string, buttonLabel = "Copy") => (
     <div className="path"><div><span>{label}</span><code>{value}</code></div>
-      <button disabled={!!busy} onClick={() => copy(value)}>Copy</button></div>
+      <button aria-label={`Copy ${label.toLowerCase()}`} disabled={!!busy || !value} onClick={() => copy(value)}>{buttonLabel}</button></div>
   );
   const rootMatches = matchesPath(paths.games, observed, platform?.os === "windows");
   const supported = Boolean(platform?.formats.length);
@@ -114,7 +117,8 @@ function App() {
     setStage(to);
     setError("");
     setNotice("");
-    document.querySelector("main")?.focus();
+    document.querySelector("main")?.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
   }
 
   function advance() {
@@ -132,17 +136,25 @@ function App() {
   switch (stage) {
     case 0:
       content = <>
-        <h1>Set up your game library.</h1>
-        <p>Install the official GameVault 2 desktop client, prepare your game folders, and connect to our server.</p>
-        <div className="callout"><strong>GameVault 2 is in public beta.</strong><p>Joiner uses the official stable update channel. You’ll finish your profile and preferences in GameVault.</p></div>
+        <h1 className="welcome-title">Set up your game library.</h1>
+        <p className="lead">Install the official GameVault 2 desktop client, prepare your game folders, and connect to our server.</p>
+        <div className="callout account-note"><strong>GameVault 2 is in public beta.</strong><p>Joiner uses the official stable update channel. You’ll finish your profile and preferences in GameVault.</p></div>
       </>;
       break;
     case 1:
       content = <>
         <h1>Check compatibility</h1>
         {platform ? <>
-          <div className="callout"><strong>{platform.distro ?? ({ windows: "Windows", linux: "Linux", macos: "macOS" }[platform.os] ?? platform.os)} · {platform.arch}</strong>
-            <p>{supported ? "A matching GameVault package is available for this platform." : "This OS and CPU combination is outside the supported desktop builds."}</p></div>
+          <div className="callout">
+            <div className="platform">
+              {Object.hasOwn(platformNames, platform.os) && <span className={`platform-icon platform-${platform.os}`} aria-hidden="true" />}
+              <div>
+                <strong>{platformNames[platform.os] ?? platform.os}</strong>
+                <small>{[platform.distro, platform.arch === "x86_64" ? "x64" : platform.arch].filter(Boolean).join(" · ")}</small>
+              </div>
+            </div>
+            <p>{supported ? "A matching GameVault package is available for this platform." : "This OS and CPU combination is outside the supported desktop builds."}</p>
+          </div>
           {existing ? <><h2>Existing GameVault indicators</h2><ul>{platform.existing.map((entry) => <li key={entry}>{entry}</li>)}</ul></> :
             <p>No GameVault 2 installation was found in common locations. Portable and custom installations may need to be checked manually.</p>}
           {supported && <p>{platform.version ? `Detected version ${platform.version}.` : "Check Settings → About in GameVault for the exact installed version."}</p>}
@@ -161,13 +173,15 @@ function App() {
             <select value={flavor} disabled={!!busy} onChange={(event) => {
               setFlavor(event.target.value as Flavor); setRelease(undefined); setSaved(""); setProgress(undefined); setAllowInstall(false); setError("");
             }}>{platform.formats.map((option) => <option key={option} value={option}>{formats[option]}</option>)}</select></label>}
+          {flavor && platform?.formats.length === 1 && <strong>{formats[flavor]}</strong>}
           {flavor && <p>{installerHelp[flavor]}</p>}
           <p>Official builds may be unsigned. Follow your operating system’s security guidance if it blocks the installer.</p>
           <div className="actions">
             <button disabled={!!busy || !flavor} onClick={() => void run("Checking GitHub Releases…", async () => {
               setRelease(undefined); setSaved(""); setProgress(undefined); setAllowInstall(false);
               setRelease(await invoke<Package>("latest", { flavor }));
-            })}>{release ? "Refresh release" : "Check stable release"}</button>
+            })}>{release ? "Check again" : "Find latest stable release"}</button>
+            <button className="text-button" disabled={!!busy} onClick={() => browse(officialReleases)}>Browse official releases</button>
           </div>
           {release && <>
             <p><strong>GameVault {release.version}</strong> · {mib(release.size)} MiB</p>
@@ -176,7 +190,7 @@ function App() {
               channel.onmessage = setProgress;
               setProgress({ received: 0, total: release.size });
               setSaved(await invoke<string>("download_client", { flavor, expectedVersion: release.version, onProgress: channel }));
-            })}>Download and verify</button>}
+            })}>Download GameVault</button>}
             {busy === "Downloading and verifying…" && <button className="quiet" onClick={() => {
               void invoke("cancel_download").then(() => setNotice("Cancel requested. Waiting for the download to stop."), (problem) => setError(String(problem)));
             }}>Cancel download</button>}
@@ -233,12 +247,12 @@ function App() {
     case 3:
       content = <>
         <h1>Connect to our server</h1>
-        {copyField("Server address", SERVER)}
-        <ol>
-          <li>In GameVault, open <strong>New Profile</strong> and paste the server address.</li>
-          <li>Choose <strong>Sign Up</strong> if you need an account or <strong>Sign In</strong> if you already have one. Enter credentials in GameVault.</li>
-          <li>New accounts wait for an administrator to approve access. Return here after you can sign in and see the library.</li>
+        {copyField("Server address", SERVER, "Copy address")}
+        <ol className="instructions" role="list">
+          <li><div><h2>Add a server profile</h2><p>In GameVault, open <strong>New Profile</strong> and paste the server address.</p></div></li>
+          <li><div><h2>Sign up or sign in</h2><p>Choose <strong>Sign Up</strong> if you need an account or <strong>Sign In</strong> if you already have one. Enter credentials in GameVault.</p></div></li>
         </ol>
+        <div className="callout account-note"><strong>New accounts need administrator approval.</strong><p>Return here after you can sign in and see the library in the desktop client.</p></div>
         <button disabled={!!busy} onClick={() => browse(SERVER + "/")}>Open server in browser</button>
         <label className="check"><input type="checkbox" checked={profileReady} onChange={(event) => setProfileReady(event.target.checked)} />
           I am signed in to this server in the GameVault desktop client</label>
@@ -275,20 +289,29 @@ function App() {
   }
 
   return <div className="shell">
-    <aside><div className="brand"><span className="mark" aria-hidden="true">∷</span> GameVault Joiner</div>
-      <nav aria-label="Setup progress"><ol>{stages.map((label, index) => <li key={label} aria-current={index === stage ? "step" : undefined}>
-        <span aria-hidden="true">{index < stage ? "✓" : index + 1}</span>{label}
-      </li>)}</ol></nav></aside>
+    <CoverBackdrop />
+    <aside className="sidebar">
+      <div className="sidebar-inner">
+        <div className="brand"><span className="mark" aria-hidden="true">∷</span> GameVault Joiner</div>
+        <nav aria-label="Setup progress"><ol role="list">{stages.map((label, index) => <li key={label} aria-current={index === stage ? "step" : undefined} className={index < stage ? "done" : undefined}>
+          <span aria-hidden="true">{index < stage ? "✓" : index + 1}</span>{label}
+        </li>)}</ol></nav>
+        <ThemeToggle />
+      </div>
+    </aside>
     <main tabIndex={-1}>
       <div className="step">Step {stage + 1} of {stages.length}</div>
       <section key={stage} className="stage-content" aria-label={stages[stage]}>{content}</section>
       {busy && <p role="status" className="feedback">{busy}</p>}
       {notice && <p role="status" className="feedback">{notice}</p>}
       {error && <p role="alert" className="error">{error}</p>}
-      <footer>{stage > 0 && <button disabled={!!busy} onClick={() => go(stage - 1)}>Back</button>}
+      <footer>
+        {stage > 0 && <button disabled={!!busy} onClick={() => go(stage - 1)}>Back</button>}
+        {(stage === 0 || stage === stages.length - 1) && <button disabled={!!busy} onClick={() => browse(SERVER + "/")}>Open GameVault in browser</button>}
         {stage < stages.length - 1 && <button className="primary" disabled={!next || !!busy} onClick={advance}>
           {stage === 0 ? "Start setup" : stage === 5 ? "Finish setup" : "Continue"}
-        </button>}</footer>
+        </button>}
+      </footer>
     </main>
   </div>;
 }

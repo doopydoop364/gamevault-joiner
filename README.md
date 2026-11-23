@@ -1,6 +1,6 @@
 # GameVault Joiner
 
-A desktop setup assistant for the [GameVault server](https://gamevault.pcenthusiast.blog), plus the source for its planned [download website](https://join.gamevault.pcenthusiast.blog).
+A desktop setup assistant for the [GameVault server](https://gamevault.pcenthusiast.blog), plus the source for its [download website](https://join.gamevault.pcenthusiast.blog).
 
 Download the [latest installers](https://github.com/doopydoop364/gamevault-joiner/releases/latest) directly from GitHub.
 
@@ -8,13 +8,15 @@ Joiner downloads the official GameVault 2 stable-channel package directly from P
 
 ## Interface previews
 
-**Arcade green** is the current Joiner design. The wizard uses short transitions between steps and follows your system's reduced-motion preference.
+Joiner follows your system theme until you choose light or dark mode. It remembers your choice and respects the system's reduced motion setting.
 
-![GameVault Joiner welcome screen in arcade green](docs/images/joiner-arcade.png)
+**Light mode**
 
-**Midnight blue** is an alternate design concept for comparison. It is a preview, not a theme option in the released app.
+![GameVault Joiner welcome screen in light mode](docs/images/joiner-light.jpg)
 
-![GameVault Joiner welcome screen in midnight blue](docs/images/joiner-midnight.png)
+**Dark mode**
+
+![GameVault Joiner welcome screen in dark mode](docs/images/joiner-dark.jpg)
 
 ## Supported platforms
 
